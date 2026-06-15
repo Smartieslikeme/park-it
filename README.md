@@ -640,7 +640,7 @@ See [GitHub Issues](https://github.com/Smartieslikeme/park-it/issues) for latest
 
 - **Issues & Bug Reports:** [GitHub Issues](https://github.com/Smartieslikeme/park-it/issues)
 - **Discussions & Feature Requests:** [GitHub Discussions](https://github.com/Smartieslikeme/park-it/discussions)
-- **Email:** contact@park-it.local (placeholder)
+- **Email:** smartieslikeme@icloud.com
 
 ---
 
@@ -648,7 +648,7 @@ See [GitHub Issues](https://github.com/Smartieslikeme/park-it/issues) for latest
 
 Park-It is licensed under the **MIT License** — see [LICENSE](./LICENSE) file for details.
 
-You are free to use, modify, and distribute this project, provided you include the original license and copyright notice.
+
 
 ---
 
@@ -668,9 +668,9 @@ You are free to use, modify, and distribute this project, provided you include t
 |---|---|
 | **Current Phase** | MVP Development |
 | **Test Coverage** | TBD (target: 80%+) |
-| **Build Status** | ![Build](https://img.shields.io/badge/build-passing-brightgreen) |
+| **Build Status** | ![Build](https://img.shields.io/badge/build-passing-brightyellow) |
 | **Last Updated** | June 2026 |
-| **Contributors** | 1 (you!) |
+| **Contributors** | 1 (meeee!) |
 
 ---
 
