@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
-from app.routes import auth
+from app.routes import auth, signs
 from app.config import get_settings
 
 # Create tables
@@ -28,6 +28,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth.router)
+app.include_router(signs.router)
 
 
 @app.get("/")
