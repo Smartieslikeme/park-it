@@ -1,15 +1,16 @@
 import { useState, useMemo } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { Page, PageHeader, PageTitle, PageBody, Card, Badge, Input, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, EmptyState } from '@blinkdotnew/ui'
-import { Search, ClipboardList, Plus, Pencil, Trash2, ChevronRight } from 'lucide-react'
+import { Page, PageHeader, PageTitle, PageBody, PageActions, Button, Card, Badge, Input, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, EmptyState } from '@blinkdotnew/ui'
+import { Search, ClipboardList, Plus, Pencil, Trash2, ChevronRight, ShieldCheck, ShieldX, RefreshCw, Loader2 } from 'lucide-react'
 import { blink } from '@/blink/client'
 import type { AuditLog } from '@/types/park-it'
 import { ACTION_LABEL, ENTITY_LABEL, ACTION_OPTIONS, ENTITY_OPTIONS, filterLogs, parseChanges } from '@/lib/audit-helpers'
 import { formatRelativeTime } from '@/lib/dashboard-helpers'
+import { verifyChain, type ChainVerifyResult } from '@/lib/audit'
 
 export const Route = createFileRoute('/audit-logs')({
-  head: () => ({ meta: [{ title: 'Audit Logs · Park-It' }, { name: 'description', content: 'Full audit trail of every administrative action. Future-ready for immutable verification records.' }] }),
+  head: () => ({ meta: [{ title: 'Audit Logs · Park-It' }, { name: 'description', content: 'Full audit trail of every administrative action. Server-anchored hash chain for tamper-evident verification.' }] }),
   component: AuditLogsPage,
 })
 
@@ -18,18 +19,58 @@ function AuditLogsPage() {
   const [action, setAction] = useState('all')
   const [entity, setEntity] = useState('all')
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
+  const [verify, setVerify] = useState<ChainVerifyResult | null>(null)
+  const [verifying, setVerifying] = useState(false)
 
-  const logsQuery = useQuery({ queryKey: ['audit_logs'], queryFn: async () => { const l = await blink.db.table<AuditLog>('audit_logs').list({ orderBy: { createdAt: 'desc' } }); return Array.isArray(l) ? l : [] } })
+  const logsQuery = useQuery({ queryKey: ['audit_logs'], queryFn: async () => { const l = await blink.db.auditLogs.list({ orderBy: { createdAt: 'desc' } }); return Array.isArray(l) ? l : [] } })
   const logs = logsQuery.data ?? []
   const filtered = useMemo(() => filterLogs(logs, { search, action, entity }), [logs, search, action, entity])
   const toggle = (id: string) => setExpanded(p => ({ ...p, [id]: !p[id] }))
 
+  const runVerify = async () => {
+    setVerifying(true)
+    try {
+      const r = await verifyChain(100)
+      setVerify(r)
+    } finally {
+      setVerifying(false)
+    }
+  }
+
   return (
     <Page>
       <PageHeader>
-        <div><PageTitle>Audit Logs</PageTitle><p className="text-xs text-muted-foreground">{logs.length} total event{logs.length === 1 ? '' : 's'} · immutable trail</p></div>
+        <div><PageTitle>Audit Logs</PageTitle><p className="text-xs text-muted-foreground">{logs.length} total event{logs.length === 1 ? '' : 's'} · server-anchored chain</p></div>
+        <PageActions>
+          <Button variant="outline" size="sm" onClick={runVerify} disabled={verifying}>
+            {verifying ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <ShieldCheck className="h-4 w-4 mr-1.5" />}
+            Verify chain
+          </Button>
+        </PageActions>
       </PageHeader>
       <PageBody className="space-y-4">
+        {verify && (
+          <Card className={`p-3 flex items-center gap-3 ${verify.reachable && verify.ok ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50/40 dark:bg-emerald-950/20' : verify.reachable && !verify.ok ? 'border-rose-200 dark:border-rose-800 bg-rose-50/40 dark:bg-rose-950/20' : 'border-amber-200 dark:border-amber-800 bg-amber-50/40 dark:bg-amber-950/20'}`}>
+            {verify.reachable ? (
+              verify.ok ? <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" /> : <ShieldX className="h-4 w-4 text-rose-600 dark:text-rose-400 shrink-0" />
+            ) : (
+              <ShieldX className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium">
+                {!verify.reachable
+                  ? 'Backend unreachable — chain is being recorded in local-fallback mode only.'
+                  : verify.ok
+                    ? `Chain intact · ${verify.verified} of ${verify.scanned} record${verify.scanned === 1 ? '' : 's'} verified`
+                    : `Chain broken at record ${verify.brokenAt} · ${verify.verified} verified before break`}
+              </p>
+              {verify.head && <p className="text-[10px] text-muted-foreground font-mono truncate">head: {verify.head}</p>}
+            </div>
+            <Button variant="ghost" size="sm" onClick={runVerify} disabled={verifying} className="shrink-0">
+              <RefreshCw className={`h-3.5 w-3.5 ${verifying ? 'animate-spin' : ''}`} />
+            </Button>
+          </Card>
+        )}
         <Card className="p-3">
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1"><Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><Input placeholder="Search user, entity, or change…" value={search} onChange={e => setSearch(e.target.value)} className="pl-8" /></div>
