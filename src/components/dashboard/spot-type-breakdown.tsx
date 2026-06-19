@@ -24,10 +24,22 @@ export function SpotTypeBreakdown({ data }: { data: Array<{ type: string; count:
           return (
             <div key={d.type} className="space-y-1">
               <div className="flex items-center justify-between text-xs">
-                <span className="inline-flex items-center gap-2 font-medium"><span className={cn('h-2 w-2 rounded-full', meta.color)} />{meta.label}</span>
+                <span className="inline-flex items-center gap-2 font-medium">
+                  <span className={cn('h-2 w-2 rounded-full', meta.color)} aria-hidden="true" />
+                  {meta.label}
+                </span>
                 <span className="text-muted-foreground tabular-nums">{d.count} <span className="text-[10px]">({pct.toFixed(0)}%)</span></span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden"><div className={cn('h-full rounded-full transition-all', meta.color)} style={{ width: `${pct}%` }} /></div>
+              <div
+                className="h-1.5 w-full rounded-full bg-muted overflow-hidden"
+                role="progressbar"
+                aria-valuenow={d.count}
+                aria-valuemin={0}
+                aria-valuemax={total}
+                aria-label={`${meta.label}: ${d.count} of ${total} spots (${pct.toFixed(0)}%)`}
+              >
+                <div className={cn('h-full rounded-full transition-all', meta.color)} style={{ width: `${pct}%` }} />
+              </div>
             </div>
           )
         })}

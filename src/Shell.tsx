@@ -27,25 +27,34 @@ interface ShellProps {
 
 export function Shell({ sidebar, appName = 'App', children }: ShellProps) {
   return (
-    <AppShell>
-      {/* Sidebar — hidden on mobile, always visible on md+.
-          No explicit width here — AppSidebarShell owns its own width
-          and animates it on collapse/expand. */}
-      <AppShellSidebar className="shrink-0">
-        {sidebar}
-      </AppShellSidebar>
+    <>
+      {/* Skip-to-content: lets keyboard users jump past the sidebar */}
+      <a href="#main-content" className="skip-to-content">
+        Skip to main content
+      </a>
 
-      {/* Main content */}
-      <AppShellMain>
-        {/* Mobile header — hamburger + app name, only shown below md breakpoint */}
-        <div className="md:hidden flex items-center gap-3 px-4 h-14 border-b border-border bg-background sticky top-0 z-30">
-          <MobileSidebarTrigger />
-          <span className="font-semibold text-sm">{appName}</span>
-        </div>
+      <AppShell>
+        {/* Sidebar — hidden on mobile, always visible on md+.
+            No explicit width here — AppSidebarShell owns its own width
+            and animates it on collapse/expand. */}
+        <AppShellSidebar className="shrink-0">
+          {sidebar}
+        </AppShellSidebar>
 
-        {/* Page content */}
-        {children}
-      </AppShellMain>
-    </AppShell>
+        {/* Main content */}
+        <AppShellMain>
+          {/* Mobile header — hamburger + app name, only shown below md breakpoint */}
+          <header className="md:hidden flex items-center gap-3 px-4 h-14 border-b border-border bg-background sticky top-0 z-30" role="banner">
+            <MobileSidebarTrigger />
+            <span className="font-semibold text-sm">{appName}</span>
+          </header>
+
+          {/* Page content */}
+          <main id="main-content" tabIndex={-1}>
+            {children}
+          </main>
+        </AppShellMain>
+      </AppShell>
+    </>
   )
 }

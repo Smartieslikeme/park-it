@@ -74,8 +74,17 @@ function VehiclesPage() {
       <PageHeader>
         <div><PageTitle>Vehicles</PageTitle><p className="text-xs text-muted-foreground">Encrypted vehicle registry with permit tracking.</p></div>
         <PageActions>
-          <div className="relative"><Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><Input placeholder="Search plate, owner, permit…" value={search} onChange={e => setSearch(e.target.value)} className="pl-8 w-64" /></div>
-          <Button onClick={() => setAddOpen(true)}><Plus className="h-4 w-4 mr-1.5" />Register Vehicle</Button>
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            <Input
+              placeholder="Search plate, owner, permit…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-8 w-64"
+              aria-label="Search vehicles by plate, owner, or permit number"
+            />
+          </div>
+          <Button onClick={() => setAddOpen(true)}><Plus className="h-4 w-4 mr-1.5" aria-hidden="true" />Register Vehicle</Button>
         </PageActions>
       </PageHeader>
       <PageBody>
@@ -87,11 +96,11 @@ function VehiclesPage() {
       <VehicleFormDialog open={!!editing} onOpenChange={o => !o && setEditing(null)} vehicle={editing} onSaved={() => setEditing(null)} queryClient={queryClient} />
       <Dialog open={!!deleting} onOpenChange={o => !o && setDeleting(null)}>
         <DialogContent className="sm:max-w-[400px]">
-          <DialogHeader><DialogTitle>Delete Vehicle</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">Remove <strong className="text-foreground font-mono">{deleting?.plateNumber}</strong>? Cannot be undone.</p>
+          <DialogHeader><DialogTitle>Remove Vehicle</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">Are you sure you want to permanently remove <strong className="text-foreground font-mono">{deleting?.plateNumber}</strong>? This cannot be undone.</p>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleting(null)} disabled={deleteMutation.isPending}>Cancel</Button>
-            <Button variant="destructive" onClick={() => deleting && deleteMutation.mutate(deleting.id)} disabled={deleteMutation.isPending}>{deleteMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}Delete</Button>
+            <Button variant="outline" onClick={() => setDeleting(null)} disabled={deleteMutation.isPending}>Cancel — keep vehicle</Button>
+            <Button variant="destructive" onClick={() => deleting && deleteMutation.mutate(deleting.id)} disabled={deleteMutation.isPending}>{deleteMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />}Yes, remove vehicle</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -133,31 +142,41 @@ function VehicleFormDialog({ open, onOpenChange, vehicle, onSaved, queryClient }
       <DialogContent className="sm:max-w-[520px]">
         <DialogHeader><DialogTitle>{isEdit ? 'Edit Vehicle' : 'Register Vehicle'}</DialogTitle></DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5"><Label className="text-sm font-medium">License Plate <span className="text-destructive">*</span></Label><Input placeholder="ABC-1234" value={form.plateNumber} onChange={e => uf('plateNumber', e.target.value.toUpperCase())} className="font-mono" aria-invalid={!!errors.plateNumber} />{errors.plateNumber && <p className="text-xs text-destructive">{errors.plateNumber}</p>}</div>
+          <div className="space-y-1.5">
+            <Label htmlFor="vehicle-plate" className="text-sm font-medium">License Plate <span className="text-destructive" aria-hidden="true">*</span><span className="sr-only">(required)</span></Label>
+            <Input id="vehicle-plate" placeholder="ABC-1234" value={form.plateNumber} onChange={e => uf('plateNumber', e.target.value.toUpperCase())} className="font-mono" aria-invalid={!!errors.plateNumber} aria-describedby={errors.plateNumber ? 'vehicle-plate-error' : undefined} />
+            {errors.plateNumber && <p id="vehicle-plate-error" className="text-xs text-destructive" role="alert">{errors.plateNumber}</p>}
+          </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5"><Label className="text-sm font-medium">Vehicle Type</Label><Select value={form.vehicleType} onValueChange={v => uf('vehicleType', v)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{['car','motorcycle','suv','truck','van','other'].map(t => <SelectItem key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</SelectItem>)}</SelectContent></Select></div>
-            <div className="space-y-1.5"><Label className="text-sm font-medium">Color</Label><Input placeholder="Silver" value={form.color} onChange={e => uf('color', e.target.value)} /></div>
-            <div className="space-y-1.5"><Label className="text-sm font-medium">Make</Label><Input placeholder="Tesla" value={form.make} onChange={e => uf('make', e.target.value)} /></div>
-            <div className="space-y-1.5"><Label className="text-sm font-medium">Model</Label><Input placeholder="Model 3" value={form.model} onChange={e => uf('model', e.target.value)} /></div>
+            <div className="space-y-1.5">
+              <Label htmlFor="vehicle-type" className="text-sm font-medium">Vehicle Type</Label>
+              <Select value={form.vehicleType} onValueChange={v => uf('vehicleType', v)}>
+                <SelectTrigger id="vehicle-type"><SelectValue /></SelectTrigger>
+                <SelectContent>{['car','motorcycle','suv','truck','van','other'].map(t => <SelectItem key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5"><Label htmlFor="vehicle-color" className="text-sm font-medium">Color</Label><Input id="vehicle-color" placeholder="Silver" value={form.color} onChange={e => uf('color', e.target.value)} /></div>
+            <div className="space-y-1.5"><Label htmlFor="vehicle-make" className="text-sm font-medium">Make</Label><Input id="vehicle-make" placeholder="Tesla" value={form.make} onChange={e => uf('make', e.target.value)} /></div>
+            <div className="space-y-1.5"><Label htmlFor="vehicle-model" className="text-sm font-medium">Model</Label><Input id="vehicle-model" placeholder="Model 3" value={form.model} onChange={e => uf('model', e.target.value)} /></div>
           </div>
           <div className="border-t border-border pt-3 space-y-3">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Owner (encrypted at rest)</p>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Owner <span className="normal-case">(stored encrypted)</span></p>
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5"><Label className="text-sm font-medium">Name</Label><Input placeholder="John Doe" value={form.ownerName} onChange={e => uf('ownerName', e.target.value)} /></div>
-              <div className="space-y-1.5"><Label className="text-sm font-medium">Phone</Label><Input placeholder="+1 555-1234" value={form.ownerPhone} onChange={e => uf('ownerPhone', e.target.value)} /></div>
+              <div className="space-y-1.5"><Label htmlFor="vehicle-owner-name" className="text-sm font-medium">Name</Label><Input id="vehicle-owner-name" placeholder="John Doe" value={form.ownerName} onChange={e => uf('ownerName', e.target.value)} /></div>
+              <div className="space-y-1.5"><Label htmlFor="vehicle-owner-phone" className="text-sm font-medium">Phone</Label><Input id="vehicle-owner-phone" placeholder="+1 555-1234" value={form.ownerPhone} onChange={e => uf('ownerPhone', e.target.value)} /></div>
             </div>
           </div>
           <div className="border-t border-border pt-3 space-y-3">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Permit</p>
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5"><Label className="text-sm font-medium">Permit #</Label><Input placeholder="RES-2024-117" value={form.permitNumber} onChange={e => uf('permitNumber', e.target.value)} className="font-mono" /></div>
-              <div className="space-y-1.5"><Label className="text-sm font-medium">Expiry</Label><Input type="date" value={form.permitExpiry} onChange={e => uf('permitExpiry', e.target.value)} /></div>
+              <div className="space-y-1.5"><Label htmlFor="vehicle-permit-num" className="text-sm font-medium">Permit number</Label><Input id="vehicle-permit-num" placeholder="RES-2024-117" value={form.permitNumber} onChange={e => uf('permitNumber', e.target.value)} className="font-mono" /></div>
+              <div className="space-y-1.5"><Label htmlFor="vehicle-permit-expiry" className="text-sm font-medium">Expiry date</Label><Input id="vehicle-permit-expiry" type="date" value={form.permitExpiry} onChange={e => uf('permitExpiry', e.target.value)} /></div>
             </div>
-            <label className="flex items-center gap-2 cursor-pointer"><Switch checked={form.isRegistered} onCheckedChange={v => uf('isRegistered', v)} /><span className="text-sm">Mark as registered</span></label>
+            <label htmlFor="vehicle-registered" className="flex items-center gap-2 cursor-pointer"><Switch id="vehicle-registered" checked={form.isRegistered} onCheckedChange={v => uf('isRegistered', v)} /><span className="text-sm">Mark as registered</span></label>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>Cancel</Button>
-            <Button type="submit" disabled={isPending}>{isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}{isEdit ? 'Save' : 'Register'}</Button>
+            <Button type="submit" disabled={isPending}>{isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />}{isEdit ? 'Save Changes' : 'Register Vehicle'}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
