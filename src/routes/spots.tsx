@@ -61,8 +61,8 @@ function SpotsPage() {
         <PageActions><Button onClick={() => setAddOpen(true)}><Plus className="h-4 w-4 mr-1.5" />Add Spot</Button></PageActions>
       </PageHeader>
       <PageBody>
-        {isLoading ? <div className="space-y-2">{[0,1,2,3].map(i => <div key={i} className="h-14 rounded-md bg-muted/40 animate-pulse" />)}</div>
-        : dataRows.length === 0 ? <EmptyState icon={<MapPin className="h-6 w-6" />} title="No spots yet" description="Add your first parking spot to get started." />
+        {isLoading ? <div className="space-y-2" aria-label="Loading parking spots" role="status">{[0,1,2,3].map(i => <div key={i} className="h-14 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />)}</div>
+        : dataRows.length === 0 ? <EmptyState icon={<MapPin className="h-6 w-6" aria-hidden="true" />} title="No spots yet" description="Add your first parking spot to get started." />
         : <DataTable columns={columns} data={dataRows} />}
       </PageBody>
       <SpotFormDialog open={addOpen} onOpenChange={setAddOpen} spot={null} onSaved={() => setAddOpen(false)} queryClient={queryClient} />
@@ -70,11 +70,11 @@ function SpotsPage() {
       <Dialog open={!!deleting} onOpenChange={o => !o && setDeleting(null)}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader><DialogTitle>Delete Parking Spot</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">Are you sure you want to delete <strong>{deleting?.name}</strong>? This action cannot be undone.</p>
+          <p className="text-sm text-muted-foreground">Are you sure you want to permanently delete <strong>{deleting?.name}</strong>? This cannot be undone.</p>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleting(null)} disabled={deleteMutation.isPending}>Cancel</Button>
+            <Button variant="outline" onClick={() => setDeleting(null)} disabled={deleteMutation.isPending}>Cancel — keep spot</Button>
             <Button variant="destructive" onClick={() => deleting && deleteMutation.mutate(deleting.id)} disabled={deleteMutation.isPending}>
-              {deleteMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}Delete
+              {deleteMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />}Yes, delete spot
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -112,27 +112,27 @@ function SpotFormDialog({ open, onOpenChange, spot, onSaved, queryClient }: { op
         <DialogHeader><DialogTitle>{isEdit ? 'Edit Parking Spot' : 'Add Parking Spot'}</DialogTitle></DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="spot-name" className="text-sm font-medium">Name <span className="text-destructive">*</span></Label>
-            <Input id="spot-name" placeholder="e.g. P1-A12" value={form.name} onChange={e => uf('name', e.target.value)} aria-invalid={!!errors.name} />
-            {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+            <Label htmlFor="spot-name" className="text-sm font-medium">Name <span className="text-destructive" aria-hidden="true">*</span><span className="sr-only">(required)</span></Label>
+            <Input id="spot-name" placeholder="e.g. P1-A12" value={form.name} onChange={e => uf('name', e.target.value)} aria-invalid={!!errors.name} aria-describedby={errors.name ? 'spot-name-error' : undefined} />
+            {errors.name && <p id="spot-name-error" className="text-xs text-destructive" role="alert">{errors.name}</p>}
           </div>
           <div className="space-y-1.5"><Label htmlFor="spot-loc" className="text-sm font-medium">Location</Label><Input id="spot-loc" placeholder="e.g. Main Garage" value={form.locationName} onChange={e => uf('locationName', e.target.value)} /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5"><Label htmlFor="spot-lat" className="text-sm font-medium">Latitude</Label><Input id="spot-lat" placeholder="42.3601" value={form.lat} onChange={e => uf('lat', e.target.value)} aria-invalid={!!errors.lat} />{errors.lat && <p className="text-xs text-destructive">{errors.lat}</p>}</div>
-            <div className="space-y-1.5"><Label htmlFor="spot-lng" className="text-sm font-medium">Longitude</Label><Input id="spot-lng" placeholder="-71.0589" value={form.lng} onChange={e => uf('lng', e.target.value)} aria-invalid={!!errors.lng} />{errors.lng && <p className="text-xs text-destructive">{errors.lng}</p>}</div>
+            <div className="space-y-1.5"><Label htmlFor="spot-lat" className="text-sm font-medium">Latitude</Label><Input id="spot-lat" placeholder="42.3601" value={form.lat} onChange={e => uf('lat', e.target.value)} aria-invalid={!!errors.lat} aria-describedby={errors.lat ? 'spot-lat-error' : undefined} />{errors.lat && <p id="spot-lat-error" className="text-xs text-destructive" role="alert">{errors.lat}</p>}</div>
+            <div className="space-y-1.5"><Label htmlFor="spot-lng" className="text-sm font-medium">Longitude</Label><Input id="spot-lng" placeholder="-71.0589" value={form.lng} onChange={e => uf('lng', e.target.value)} aria-invalid={!!errors.lng} aria-describedby={errors.lng ? 'spot-lng-error' : undefined} />{errors.lng && <p id="spot-lng-error" className="text-xs text-destructive" role="alert">{errors.lng}</p>}</div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5"><Label className="text-sm font-medium">Floor</Label><Input placeholder="e.g. 1" value={form.floor} onChange={e => uf('floor', e.target.value)} /></div>
-            <div className="space-y-1.5"><Label className="text-sm font-medium">Section</Label><Input placeholder="e.g. A" value={form.section} onChange={e => uf('section', e.target.value)} /></div>
+            <div className="space-y-1.5"><Label htmlFor="spot-floor" className="text-sm font-medium">Floor</Label><Input id="spot-floor" placeholder="e.g. 1" value={form.floor} onChange={e => uf('floor', e.target.value)} /></div>
+            <div className="space-y-1.5"><Label htmlFor="spot-section" className="text-sm font-medium">Section</Label><Input id="spot-section" placeholder="e.g. A" value={form.section} onChange={e => uf('section', e.target.value)} /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5"><Label className="text-sm font-medium">Spot Type</Label>
-              <Select value={form.spotType} onValueChange={v => uf('spotType', v as ParkingSpot['spotType'])}><SelectTrigger><SelectValue /></SelectTrigger>
+            <div className="space-y-1.5"><Label htmlFor="spot-type" className="text-sm font-medium">Spot Type</Label>
+              <Select value={form.spotType} onValueChange={v => uf('spotType', v as ParkingSpot['spotType'])}><SelectTrigger id="spot-type"><SelectValue /></SelectTrigger>
                 <SelectContent>{['standard','handicap','electric','compact','motorcycle','reserved'].map(t => <SelectItem key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5"><Label className="text-sm font-medium">Status</Label>
-              <Select value={form.status} onValueChange={v => uf('status', v as ParkingSpot['status'])}><SelectTrigger><SelectValue /></SelectTrigger>
+            <div className="space-y-1.5"><Label htmlFor="spot-status" className="text-sm font-medium">Status</Label>
+              <Select value={form.status} onValueChange={v => uf('status', v as ParkingSpot['status'])}><SelectTrigger id="spot-status"><SelectValue /></SelectTrigger>
                 <SelectContent>{['available','occupied','maintenance','reserved'].map(s => <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>)}</SelectContent>
               </Select>
             </div>
@@ -140,7 +140,7 @@ function SpotFormDialog({ open, onOpenChange, spot, onSaved, queryClient }: { op
           <div className="space-y-1.5"><Label htmlFor="spot-notes" className="text-sm font-medium">Notes</Label><Input id="spot-notes" placeholder="Optional notes" value={form.notes} onChange={e => uf('notes', e.target.value)} /></div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>Cancel</Button>
-            <Button type="submit" disabled={isPending}>{isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}{isEdit ? 'Save Changes' : 'Create Spot'}</Button>
+            <Button type="submit" disabled={isPending}>{isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />}{isEdit ? 'Save Changes' : 'Create Spot'}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

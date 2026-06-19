@@ -13,17 +13,17 @@ export function QuickActions() {
   return (
     <Card className="p-5">
       <h3 className="text-sm font-semibold mb-4">Quick Actions</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <nav aria-label="Quick actions" className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {ACTIONS.map(a => (
           <Link key={a.to} to={a.to} className="group flex items-center gap-3 rounded-md border border-border bg-card p-3 transition-all hover:border-accent/40 hover:shadow-sm">
-            <span className={`inline-flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br ${a.accent} shrink-0`}>{a.icon}</span>
+            <span className={`inline-flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br ${a.accent} shrink-0`} aria-hidden="true">{a.icon}</span>
             <div className="min-w-0">
               <p className="text-sm font-medium leading-tight truncate group-hover:text-accent transition-colors">{a.label}</p>
               <p className="text-[11px] text-muted-foreground leading-tight truncate">{a.desc}</p>
             </div>
           </Link>
         ))}
-      </div>
+      </nav>
     </Card>
   )
 }

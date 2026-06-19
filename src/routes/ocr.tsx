@@ -227,15 +227,19 @@ function OcrPage() {
             {state.step === 'upload' && (
               <>
                 {spots.length === 0 ? (
-                  <Card className="p-6 border-dashed border-amber-500/30 bg-amber-50/30 dark:bg-amber-950/10">
-                    <p className="text-sm">Add a <Link to="/spots" className="text-accent underline">parking spot</Link> before scanning permits.</p>
+                  <Card className="p-6 border-dashed border-amber-500/30 bg-amber-50/30 dark:bg-amber-950/10" role="alert">
+                    <p className="text-sm">You need to <Link to="/spots" className="text-accent underline">add a parking spot</Link> before you can scan permits.</p>
                   </Card>
                 ) : (
                   <div
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Upload permit image — drag and drop or click to choose a file"
                     onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
                     onDragLeave={() => setIsDragging(false)}
                     onDrop={handleDrop}
                     onClick={() => fileRef.current?.click()}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileRef.current?.click() } }}
                     className={`flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed p-12 text-center cursor-pointer transition-colors ${isDragging ? 'border-accent bg-accent/5' : 'border-border bg-card hover:border-accent/40 hover:bg-muted/30'}`}
                   >
                     <input
@@ -243,24 +247,26 @@ function OcrPage() {
                       type="file"
                       accept="image/*"
                       className="hidden"
+                      aria-hidden="true"
+                      tabIndex={-1}
                       onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = '' }}
                     />
-                    <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                    <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-muted text-muted-foreground" aria-hidden="true">
                       <Upload className="h-6 w-6" />
                     </span>
                     <div>
                       <p className="text-sm font-medium">Drop a permit image here</p>
-                      <p className="text-xs text-muted-foreground mt-1">Image is analyzed then deleted · JPG/PNG/WebP up to 10MB</p>
+                      <p className="text-xs text-muted-foreground mt-1">Image is deleted after analysis · JPG, PNG or WebP · up to 10 MB</p>
                     </div>
                     <Button variant="outline" size="sm" type="button" onClick={(e) => { e.stopPropagation(); fileRef.current?.click() }}>
-                      <ImageIcon className="h-4 w-4 mr-1.5" />Choose file
+                      <ImageIcon className="h-4 w-4 mr-1.5" aria-hidden="true" />Choose file
                     </Button>
                   </div>
                 )}
                 {activeRules.length > 0 && (
                   <Card className="p-3">
                     <p className="text-xs text-muted-foreground">
-                      <strong>{activeRules.length}</strong> active rule{activeRules.length === 1 ? '' : 's'} will be evaluated on confirm.
+                      <strong>{activeRules.length}</strong> active rule{activeRules.length === 1 ? '' : 's'} will be checked when you confirm.
                     </p>
                   </Card>
                 )}
@@ -268,12 +274,12 @@ function OcrPage() {
             )}
 
             {state.step === 'analyzing' && (
-              <Card className="p-8">
+              <Card className="p-8" role="status" aria-live="polite" aria-label="Analyzing permit image, please wait">
                 <div className="flex flex-col items-center gap-3 max-w-md mx-auto text-center">
-                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-accent/10 text-accent">
+                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-accent/10 text-accent" aria-hidden="true">
                     <Loader2 className="h-5 w-5 animate-spin" />
                   </span>
-                  <p className="text-sm font-semibold">Analyzing permit</p>
+                  <p className="text-sm font-semibold">Analyzing permit…</p>
                   <p className="text-xs text-muted-foreground truncate max-w-xs">{state.fileName}</p>
                 </div>
               </Card>
@@ -282,11 +288,15 @@ function OcrPage() {
             {(state.step === 'review' || state.step === 'saving' || state.step === 'done') && live && liveEval && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Result banner */}
-                <Card className={`p-4 ${liveEval.allowed ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-950/20' : 'border-rose-200 dark:border-rose-800 bg-rose-50/30 dark:bg-rose-950/20'}`}>
+                <Card
+                  className={`p-4 ${liveEval.allowed ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-950/20' : 'border-rose-200 dark:border-rose-800 bg-rose-50/30 dark:bg-rose-950/20'}`}
+                  role="status"
+                  aria-live="polite"
+                >
                   <div className="flex items-start gap-3">
                     {liveEval.allowed
-                      ? <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 shrink-0"><CheckCircle2 className="h-5 w-5" /></span>
-                      : <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 shrink-0"><XCircle className="h-5 w-5" /></span>
+                      ? <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 shrink-0" aria-hidden="true"><CheckCircle2 className="h-5 w-5" /></span>
+                      : <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 shrink-0" aria-hidden="true"><XCircle className="h-5 w-5" /></span>
                     }
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold">{liveEval.allowed ? 'Rules passed' : 'Rule violation'}</p>
@@ -301,18 +311,18 @@ function OcrPage() {
                 {/* Spot / vehicle picker */}
                 <Card className="p-4 space-y-3">
                   <div className="space-y-1.5">
-                    <Label className="text-xs">Assign to spot <span className="text-destructive">*</span></Label>
+                    <Label htmlFor="ocr-spot" className="text-xs">Assign to spot <span className="text-destructive" aria-hidden="true">*</span><span className="sr-only">(required)</span></Label>
                     <Select value={state.spotId} onValueChange={(v) => setState((s) => ({ ...s, spotId: v }))}>
-                      <SelectTrigger><SelectValue placeholder="Select spot" /></SelectTrigger>
+                      <SelectTrigger id="ocr-spot"><SelectValue placeholder="Select spot" /></SelectTrigger>
                       <SelectContent>{spots.map((s) => <SelectItem key={s.id} value={s.id}>{s.name} ({s.status})</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs">Or pick existing vehicle</Label>
+                    <Label htmlFor="ocr-vehicle" className="text-xs">Or pick existing vehicle</Label>
                     <Select value={state.vehicleId ?? '__new'} onValueChange={(v) => setState((s) => ({ ...s, vehicleId: v === '__new' ? null : v, plateNumber: v === '__new' ? s.plateNumber : (vehicles.find((vv) => vv.id === v)?.plateNumber ?? '') }))}>
-                      <SelectTrigger><SelectValue placeholder="Create new from OCR" /></SelectTrigger>
+                      <SelectTrigger id="ocr-vehicle"><SelectValue placeholder="Create new from OCR" /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="__new">— Create new from OCR —</SelectItem>
+                        <SelectItem value="__new">— Create new from OCR data —</SelectItem>
                         {vehicles.map((v) => <SelectItem key={v.id} value={v.id}>{v.plateNumber}{v.ownerName ? ` (${v.ownerName})` : ''}</SelectItem>)}
                       </SelectContent>
                     </Select>
@@ -321,15 +331,15 @@ function OcrPage() {
 
                 {/* Extracted fields (editable) */}
                 <Card className="p-4 lg:col-span-2 space-y-3">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Extracted (editable)</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Extracted data — you can edit before confirming</p>
                   <div className="grid grid-cols-2 gap-3">
                     <Field label="License plate" value={live.plateNumber} onChange={(v) => setState((s) => ({ ...s, overrides: { ...s.overrides, plateNumber: v.toUpperCase() }, plateNumber: v.toUpperCase() }))} mono />
-                    <Field label="Permit #" value={live.permitNumber} onChange={(v) => setState((s) => ({ ...s, overrides: { ...s.overrides, permitNumber: v } }))} mono />
+                    <Field label="Permit number" value={live.permitNumber} onChange={(v) => setState((s) => ({ ...s, overrides: { ...s.overrides, permitNumber: v } }))} mono />
                     <Field label="Permit expiry" value={live.permitExpiry} onChange={(v) => setState((s) => ({ ...s, overrides: { ...s.overrides, permitExpiry: v } }))} placeholder="YYYY-MM-DD" />
-                    <Field label="Owner" value={live.ownerName} onChange={(v) => setState((s) => ({ ...s, overrides: { ...s.overrides, ownerName: v } }))} />
-                    <Field label="Make" value={live.vehicleMake} onChange={(v) => setState((s) => ({ ...s, overrides: { ...s.overrides, vehicleMake: v } }))} />
-                    <Field label="Model" value={live.vehicleModel} onChange={(v) => setState((s) => ({ ...s, overrides: { ...s.overrides, vehicleModel: v } }))} />
-                    <Field label="Color" value={live.vehicleColor} onChange={(v) => setState((s) => ({ ...s, overrides: { ...s.overrides, vehicleColor: v } }))} />
+                    <Field label="Owner name" value={live.ownerName} onChange={(v) => setState((s) => ({ ...s, overrides: { ...s.overrides, ownerName: v } }))} />
+                    <Field label="Vehicle make" value={live.vehicleMake} onChange={(v) => setState((s) => ({ ...s, overrides: { ...s.overrides, vehicleMake: v } }))} />
+                    <Field label="Vehicle model" value={live.vehicleModel} onChange={(v) => setState((s) => ({ ...s, overrides: { ...s.overrides, vehicleModel: v } }))} />
+                    <Field label="Vehicle color" value={live.vehicleColor} onChange={(v) => setState((s) => ({ ...s, overrides: { ...s.overrides, vehicleColor: v } }))} />
                     <Field label="Vehicle type" value={live.vehicleType} onChange={(v) => setState((s) => ({ ...s, overrides: { ...s.overrides, vehicleType: v } }))} />
                   </div>
                 </Card>
@@ -339,16 +349,20 @@ function OcrPage() {
                   {state.step !== 'done' ? (
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-xs text-muted-foreground inline-flex items-center gap-2">
-                        <AlertTriangle className="h-4 w-4 text-amber-500" />
+                        <AlertTriangle className="h-4 w-4 text-amber-500" aria-hidden="true" />
                         {liveEval.allowed ? 'Session will be created as active.' : 'Session will be flagged as a violation.'}
                       </p>
-                      <Button onClick={() => { setState((s) => ({ ...s, step: 'saving' })); confirmMut.mutate() }} disabled={state.step === 'saving' || !state.spotId}>
-                        <Save className="h-4 w-4 mr-1.5" />{state.step === 'saving' ? 'Creating…' : 'Confirm session'}
+                      <Button
+                        onClick={() => { setState((s) => ({ ...s, step: 'saving' })); confirmMut.mutate() }}
+                        disabled={state.step === 'saving' || !state.spotId}
+                        aria-label={!state.spotId ? 'Select a spot first to confirm' : state.step === 'saving' ? 'Creating session…' : 'Confirm and create parking session'}
+                      >
+                        <Save className="h-4 w-4 mr-1.5" aria-hidden="true" />{state.step === 'saving' ? 'Creating…' : 'Confirm session'}
                       </Button>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                    <div className="flex items-center gap-2" role="status" aria-live="polite">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500" aria-hidden="true" />
                       <p className="text-sm font-medium">Session created. {state.plateNumber || '(unknown)'} is now parked in {spots.find((s) => s.id === state.spotId)?.name}.</p>
                     </div>
                   )}
@@ -362,10 +376,10 @@ function OcrPage() {
               {recent.length === 0 ? (
                 <div className="p-8 text-center text-sm text-muted-foreground">No scans yet.</div>
               ) : (
-                <ul className="divide-y divide-border">
+                <ul className="divide-y divide-border" aria-label="Recent permit scans">
                   {recent.map((r) => (
                     <li key={r.id} className="flex items-center gap-3 p-4">
-                      <span className={`inline-flex h-8 w-8 items-center justify-center rounded-md ${r.allowed ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'}`}>
+                      <span className={`inline-flex h-8 w-8 items-center justify-center rounded-md ${r.allowed ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'}`} aria-hidden="true">
                         {r.allowed ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
                       </span>
                       <div className="flex-1 min-w-0">
@@ -386,10 +400,11 @@ function OcrPage() {
 }
 
 function Field({ label, value, onChange, placeholder, mono }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; mono?: boolean }) {
+  const id = `ocr-field-${label.replace(/\s+/g, '-').toLowerCase()}`
   return (
     <div className="space-y-1">
-      <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</Label>
-      <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className={mono ? 'font-mono text-sm' : 'text-sm'} />
+      <Label htmlFor={id} className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</Label>
+      <Input id={id} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className={mono ? 'font-mono text-sm' : 'text-sm'} />
     </div>
   )
 }

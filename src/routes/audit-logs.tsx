@@ -73,9 +73,18 @@ function AuditLogsPage() {
         )}
         <Card className="p-3">
           <div className="flex flex-col sm:flex-row gap-2">
-            <div className="relative flex-1"><Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><Input placeholder="Search user, entity, or change…" value={search} onChange={e => setSearch(e.target.value)} className="pl-8" /></div>
-            <Select value={action} onValueChange={setAction}><SelectTrigger className="w-full sm:w-40"><SelectValue /></SelectTrigger><SelectContent>{ACTION_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent></Select>
-            <Select value={entity} onValueChange={setEntity}><SelectTrigger className="w-full sm:w-40"><SelectValue /></SelectTrigger><SelectContent>{ENTITY_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent></Select>
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+              <Input
+                placeholder="Search user, entity, or change…"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="pl-8"
+                aria-label="Search audit logs by user, entity, or change"
+              />
+            </div>
+            <Select value={action} onValueChange={setAction}><SelectTrigger className="w-full sm:w-40" aria-label="Filter by action type"><SelectValue /></SelectTrigger><SelectContent>{ACTION_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent></Select>
+            <Select value={entity} onValueChange={setEntity}><SelectTrigger className="w-full sm:w-40" aria-label="Filter by entity type"><SelectValue /></SelectTrigger><SelectContent>{ENTITY_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent></Select>
           </div>
         </Card>
 
@@ -90,8 +99,14 @@ function AuditLogsPage() {
                 const user = log.userEmail || log.userId || 'system'
                 return (
                   <li key={log.id} className="p-4 hover:bg-muted/30 transition-colors">
-                    <button onClick={() => toggle(log.id)} className="w-full flex items-start gap-3 text-left">
-                      <span className={`mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-md shrink-0 ${log.action === 'create' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : log.action === 'update' ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300' : 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'}`}>
+                    <button
+                      onClick={() => toggle(log.id)}
+                      className="w-full flex items-start gap-3 text-left"
+                      aria-expanded={isOpen}
+                      aria-controls={`log-detail-${log.id}`}
+                      aria-label={`${ACTION_LABEL[log.action] ?? log.action} ${ENTITY_LABEL[log.entityType] ?? log.entityType} by ${user} — ${formatRelativeTime(log.createdAt)}. ${isOpen ? 'Collapse' : 'Expand'} details.`}
+                    >
+                      <span className={`mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-md shrink-0 ${log.action === 'create' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : log.action === 'update' ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300' : 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'}`} aria-hidden="true">
                         {log.action === 'create' ? <Plus className="h-3.5 w-3.5" /> : log.action === 'update' ? <Pencil className="h-3.5 w-3.5" /> : <Trash2 className="h-3.5 w-3.5" />}
                       </span>
                       <div className="flex-1 min-w-0">
@@ -102,10 +117,10 @@ function AuditLogsPage() {
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5 truncate">{user} · {formatRelativeTime(log.createdAt)}</p>
                       </div>
-                      <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform mt-1 ${isOpen ? 'rotate-90' : ''}`} />
+                      <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform mt-1 ${isOpen ? 'rotate-90' : ''}`} aria-hidden="true" />
                     </button>
                     {isOpen && (
-                      <div className="mt-3 ml-11 rounded-md border border-border bg-muted/30 p-3 text-xs">
+                      <div id={`log-detail-${log.id}`} className="mt-3 ml-11 rounded-md border border-border bg-muted/30 p-3 text-xs">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
                           <span className="text-[10px] text-muted-foreground uppercase tracking-wider">User</span><span className="truncate">{user}</span>
                           <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Timestamp</span><span>{new Date(log.createdAt).toLocaleString()}</span>

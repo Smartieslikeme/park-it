@@ -30,12 +30,16 @@ const NAV_ITEMS: NavItemDef[] = [
 
 function NavItem({ item, collapsed, isActive }: { item: NavItemDef; collapsed: boolean; isActive: boolean }) {
   const link = (
-    <a href={item.href} className={cn(
-      'flex items-center gap-2.5 rounded-md text-sm transition-colors cursor-pointer',
-      collapsed ? 'justify-center w-8 h-8 mx-auto' : 'px-3 py-2 w-full',
-      isActive ? 'bg-accent text-foreground font-medium' : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-    )}>
-      <span className="shrink-0">{item.icon}</span>
+    <a
+      href={item.href}
+      aria-current={isActive ? 'page' : undefined}
+      aria-label={collapsed ? item.label : undefined}
+      className={cn(
+        'flex items-center gap-2.5 rounded-md text-sm transition-colors cursor-pointer',
+        collapsed ? 'justify-center w-8 h-8 mx-auto' : 'px-3 py-2 w-full',
+        isActive ? 'bg-accent text-foreground font-medium' : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+      )}>
+      <span className="shrink-0" aria-hidden="true">{item.icon}</span>
       {!collapsed && <span className="truncate">{item.label}</span>}
     </a>
   )
@@ -66,34 +70,41 @@ export function AppSidebarShell() {
       )}>
         <div className={cn('flex items-center gap-2 shrink-0 border-b border-border h-[52px] px-3', collapsed && 'justify-center px-2')}>
           {!collapsed && (<>
-            <div className="flex items-center justify-center h-7 w-7 rounded-md bg-accent text-accent-foreground text-xs font-bold shrink-0">P</div>
+            <div className="flex items-center justify-center h-7 w-7 rounded-md bg-accent text-accent-foreground text-xs font-bold shrink-0" aria-hidden="true">P</div>
             <span className="flex-1 font-semibold text-sm truncate">Park-It</span>
           </>)}
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0 text-muted-foreground hover:text-foreground" onClick={toggle}>
-                <PanelLeft className={cn('h-4 w-4 transition-transform duration-200', collapsed && 'rotate-180')} />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0 shrink-0 text-muted-foreground hover:text-foreground"
+                onClick={toggle}
+                aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                aria-expanded={!collapsed}
+              >
+                <PanelLeft className={cn('h-4 w-4 transition-transform duration-200', collapsed && 'rotate-180')} aria-hidden="true" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right">{collapsed ? 'Expand sidebar' : 'Collapse sidebar'}</TooltipContent>
           </Tooltip>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-2 py-2 space-y-0.5">
-          {!collapsed && (<p className="px-3 pt-1 pb-1 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Management</p>)}
+        <nav aria-label="Main navigation" className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-2 py-2 space-y-0.5">
+          {!collapsed && (<p className="px-3 pt-1 pb-1 text-[10px] font-medium text-muted-foreground uppercase tracking-wider" aria-hidden="true">Management</p>)}
           {NAV_ITEMS.map(item => (<NavItem key={item.href} item={item} collapsed={collapsed} isActive={isActive(item.href)} />))}
-        </div>
+        </nav>
 
         <div className={cn('shrink-0 border-t border-border', collapsed ? 'flex flex-col items-center gap-1 p-2' : 'p-3 space-y-1')}>
           {collapsed ? (
             <Tooltip><TooltipTrigger asChild>
-              <button className="flex items-center justify-center h-8 w-8 rounded-md hover:bg-accent transition-colors cursor-pointer">
-                <Avatar className="h-6 w-6 shrink-0"><AvatarFallback className="text-[10px] bg-muted">U</AvatarFallback></Avatar>
+              <button aria-label="User menu" className="flex items-center justify-center h-8 w-8 rounded-md hover:bg-accent transition-colors cursor-pointer">
+                <Avatar className="h-6 w-6 shrink-0"><AvatarFallback className="text-[10px] bg-muted" aria-hidden="true">U</AvatarFallback></Avatar>
               </button>
             </TooltipTrigger><TooltipContent side="right">User</TooltipContent></Tooltip>
           ) : (
-            <button className="flex items-center gap-2 rounded-md hover:bg-accent transition-colors cursor-pointer w-full px-2 py-1.5">
-              <Avatar className="h-6 w-6 shrink-0"><AvatarFallback className="text-[10px] bg-muted">U</AvatarFallback></Avatar>
+            <button aria-label="User menu" className="flex items-center gap-2 rounded-md hover:bg-accent transition-colors cursor-pointer w-full px-2 py-1.5">
+              <Avatar className="h-6 w-6 shrink-0"><AvatarFallback className="text-[10px] bg-muted" aria-hidden="true">U</AvatarFallback></Avatar>
               <div className="flex-1 min-w-0 text-left">
                 <p className="text-xs font-medium leading-tight truncate">User</p>
                 <p className="text-[10px] text-muted-foreground leading-tight truncate">user@example.com</p>
@@ -102,13 +113,13 @@ export function AppSidebarShell() {
           )}
           {collapsed ? (
             <Tooltip><TooltipTrigger asChild>
-              <Button type="button" variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground">
-                <LogOut className="h-4 w-4 shrink-0" />
+              <Button type="button" variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground" aria-label="Sign out">
+                <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
               </Button>
             </TooltipTrigger><TooltipContent side="right">Sign out</TooltipContent></Tooltip>
           ) : (
             <Button type="button" variant="ghost" size="sm" className="w-full justify-start px-2 gap-2 text-muted-foreground hover:text-foreground">
-              <LogOut className="h-4 w-4 shrink-0" /> Sign out
+              <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" /> Sign out
             </Button>
           )}
         </div>

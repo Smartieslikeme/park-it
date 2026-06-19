@@ -17,12 +17,12 @@ const ACCENT_BG: Record<string, string> = {
 
 export function KpiCard({ label, value, hint, icon, accent = 'default', className }: KpiCardProps) {
   return (
-    <Card className={cn('p-5 flex flex-col gap-3', className)}>
+    <Card className={cn('p-5 flex flex-col gap-3', className)} role="listitem">
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
-        <span className={cn('inline-flex items-center justify-center h-8 w-8 rounded-md shrink-0', ACCENT_BG[accent])}>{icon}</span>
+        <span className={cn('inline-flex items-center justify-center h-8 w-8 rounded-md shrink-0', ACCENT_BG[accent])} aria-hidden="true">{icon}</span>
       </div>
-      <span className="text-2xl font-semibold tabular-nums tracking-tight">{value}</span>
+      <span className="text-2xl font-semibold tabular-nums tracking-tight" aria-label={`${label}: ${value}`}>{value}</span>
       {hint && <p className="text-xs text-muted-foreground -mt-1">{hint}</p>}
     </Card>
   )

@@ -97,11 +97,11 @@ function RulesPage() {
                     </div>
                     <p className="text-[11px] text-muted-foreground mt-0.5 truncate">Priority {r.priority}</p>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => toggleMut.mutate(r)} className="h-8 w-8 p-0" title={Number(r.isActive) > 0 ? 'Disable' : 'Enable'}>
-                    <Power className={Number(r.isActive) > 0 ? 'h-4 w-4 text-emerald-500' : 'h-4 w-4 text-muted-foreground'} />
+                  <Button variant="ghost" size="sm" onClick={() => toggleMut.mutate(r)} className="h-8 w-8 p-0" aria-label={Number(r.isActive) > 0 ? `Disable rule: ${r.name}` : `Enable rule: ${r.name}`} aria-pressed={Number(r.isActive) > 0}>
+                    <Power className={Number(r.isActive) > 0 ? 'h-4 w-4 text-emerald-500' : 'h-4 w-4 text-muted-foreground'} aria-hidden="true" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => setEditing(r)} className="h-8 w-8 p-0"><Pencil className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="sm" onClick={() => setDeleting(r)} className="h-8 w-8 p-0 text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="sm" onClick={() => setEditing(r)} className="h-8 w-8 p-0" aria-label={`Edit rule: ${r.name}`}><Pencil className="h-4 w-4" aria-hidden="true" /></Button>
+                  <Button variant="ghost" size="sm" onClick={() => setDeleting(r)} className="h-8 w-8 p-0 text-destructive hover:text-destructive" aria-label={`Delete rule: ${r.name}`}><Trash2 className="h-4 w-4" aria-hidden="true" /></Button>
                 </Card>
               )
             })}
@@ -114,11 +114,11 @@ function RulesPage() {
       <Dialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader><DialogTitle>Delete Rule</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">Delete <strong>{deleting?.name}</strong>? This cannot be undone.</p>
+          <p className="text-sm text-muted-foreground">Are you sure you want to permanently delete <strong>{deleting?.name}</strong>? This cannot be undone.</p>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleting(null)} disabled={del.isPending}>Cancel</Button>
+            <Button variant="outline" onClick={() => setDeleting(null)} disabled={del.isPending}>Cancel — keep rule</Button>
             <Button variant="destructive" onClick={() => deleting && del.mutate(deleting.id)} disabled={del.isPending}>
-              {del.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}Delete
+              {del.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />}Yes, delete rule
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -200,31 +200,31 @@ function RuleFormDialog({ open, onOpenChange, rule, spots, onSaved, queryClient 
         <DialogHeader><DialogTitle>{isEdit ? 'Edit Rule' : 'Add Rule'}</DialogTitle></DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Name <span className="text-destructive">*</span></Label>
-            <Input placeholder="e.g. Business hours only" value={form.name} onChange={(e) => uf('name', e.target.value)} aria-invalid={!!errors.name} />
-            {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+            <Label htmlFor="rule-name" className="text-sm font-medium">Name <span className="text-destructive" aria-hidden="true">*</span><span className="sr-only">(required)</span></Label>
+            <Input id="rule-name" placeholder="e.g. Business hours only" value={form.name} onChange={(e) => uf('name', e.target.value)} aria-invalid={!!errors.name} aria-describedby={errors.name ? 'rule-name-error' : undefined} />
+            {errors.name && <p id="rule-name-error" className="text-xs text-destructive" role="alert">{errors.name}</p>}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium">Spot <span className="text-destructive">*</span></Label>
+              <Label htmlFor="rule-spot" className="text-sm font-medium">Spot <span className="text-destructive" aria-hidden="true">*</span><span className="sr-only">(required)</span></Label>
               <Select value={form.spotId} onValueChange={(v) => uf('spotId', v)}>
-                <SelectTrigger><SelectValue placeholder="Select spot" /></SelectTrigger>
+                <SelectTrigger id="rule-spot"><SelectValue placeholder="Select spot" /></SelectTrigger>
                 <SelectContent>{spots.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
               </Select>
-              {errors.spotId && <p className="text-xs text-destructive">{errors.spotId}</p>}
+              {errors.spotId && <p id="rule-spot-error" className="text-xs text-destructive" role="alert">{errors.spotId}</p>}
             </div>
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium">Type</Label>
+              <Label htmlFor="rule-type" className="text-sm font-medium">Type</Label>
               <Select value={form.ruleType} onValueChange={(v) => uf('ruleType', v as RuleFormValues['ruleType'])}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger id="rule-type"><SelectValue /></SelectTrigger>
                 <SelectContent>{RULE_TYPES.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
               </Select>
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Priority</Label>
-            <Input type="number" min="0" value={form.priority} onChange={(e) => uf('priority', Number(e.target.value) as any)} />
-            <p className="text-[11px] text-muted-foreground">Higher priority rules are evaluated first.</p>
+            <Label htmlFor="rule-priority" className="text-sm font-medium">Priority</Label>
+            <Input id="rule-priority" type="number" min="0" value={form.priority} onChange={(e) => uf('priority', Number(e.target.value) as any)} aria-describedby="rule-priority-hint" />
+            <p id="rule-priority-hint" className="text-[11px] text-muted-foreground">Higher priority rules are evaluated first.</p>
           </div>
 
           {ruleType === 'time_restriction' && (
@@ -294,15 +294,15 @@ function RuleFormDialog({ open, onOpenChange, rule, spots, onSaved, queryClient 
             </div>
           )}
 
-          <label className="flex items-center gap-2 cursor-pointer">
-            <Switch checked={form.isActive} onCheckedChange={(v) => uf('isActive', v)} />
-            <span className="text-sm">Active</span>
+          <label htmlFor="rule-active" className="flex items-center gap-2 cursor-pointer">
+            <Switch id="rule-active" checked={form.isActive} onCheckedChange={(v) => uf('isActive', v)} />
+            <span className="text-sm">Rule is active</span>
           </label>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>Cancel</Button>
             <Button type="submit" disabled={isPending}>
-              {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />}
               {isEdit ? 'Save Changes' : 'Create Rule'}
             </Button>
           </DialogFooter>
