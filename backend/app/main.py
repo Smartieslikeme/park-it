@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
-from app.routes import auth, signs
+from app.routes import auth, signs, sessions, vehicles, photos
 from app.config import get_settings
 
 # Create tables
@@ -11,7 +11,7 @@ Base.metadata.create_all(bind=engine)
 # Initialize FastAPI app
 app = FastAPI(
     title="Park-It API",
-    description="Smart parking notification system",
+    description="Smart parking notification system - Privacy-First",
     version="0.1.0"
 )
 
@@ -29,6 +29,9 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router)
 app.include_router(signs.router)
+app.include_router(sessions.router)
+app.include_router(vehicles.router)
+app.include_router(photos.router)
 
 
 @app.get("/")
@@ -37,7 +40,8 @@ def read_root():
     return {
         "message": "Welcome to Park-It API",
         "environment": settings.environment,
-        "docs": "/docs"
+        "docs": "/docs",
+        "privacy": "Photos are deleted after text extraction. Only parking rules are saved."
     }
 
 
