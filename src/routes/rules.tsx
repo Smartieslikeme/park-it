@@ -224,7 +224,7 @@ function RuleFormDialog({ open, onOpenChange, rule, spots, onSaved, queryClient 
           <div className="space-y-1.5">
             <Label htmlFor="rule-priority" className="text-sm font-medium">Priority</Label>
             <Input id="rule-priority" type="number" min="0" value={form.priority} onChange={(e) => uf('priority', Number(e.target.value) as any)} aria-describedby="rule-priority-hint" />
-            <p id="rule-priority-hint" className="text-[11px] text-muted-foreground">Higher numbers are checked first.</p>
+            <p id="rule-priority-hint" className="text-[11px] text-muted-foreground">Higher priority rules are evaluated first.</p>
           </div>
 
           {ruleType === 'time_restriction' && (

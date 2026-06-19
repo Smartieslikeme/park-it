@@ -256,7 +256,7 @@ function OcrPage() {
                     </span>
                     <div>
                       <p className="text-sm font-medium">Drop a permit image here</p>
-                      <p className="text-xs text-muted-foreground mt-1">JPG, PNG or WebP · up to 10 MB · image is deleted after analysis</p>
+                      <p className="text-xs text-muted-foreground mt-1">Image is deleted after analysis · JPG, PNG or WebP · up to 10 MB</p>
                     </div>
                     <Button variant="outline" size="sm" type="button" onClick={(e) => { e.stopPropagation(); fileRef.current?.click() }}>
                       <ImageIcon className="h-4 w-4 mr-1.5" aria-hidden="true" />Choose file
@@ -299,7 +299,7 @@ function OcrPage() {
                       : <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 shrink-0" aria-hidden="true"><XCircle className="h-5 w-5" /></span>
                     }
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold">{liveEval.allowed ? 'All rules passed' : 'Rule violation detected'}</p>
+                      <p className="text-sm font-semibold">{liveEval.allowed ? 'Rules passed' : 'Rule violation'}</p>
                       <p className="text-xs text-muted-foreground">{liveEval.reason}</p>
                       {liveEval.matchedRuleName && (
                         <Badge variant="outline" className="mt-1.5 text-[10px]">{liveEval.matchedRuleName}</Badge>

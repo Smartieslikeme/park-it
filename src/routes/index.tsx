@@ -104,7 +104,7 @@ function RecentSessionsCard({ sessions }: { sessions: ParkingSession[] }) {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{s.plateNumber || 'No plate'}</p>
                 <p className="text-[11px] text-muted-foreground">{new Date(s.startTime).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                  {Number(s.validatedByOcr) > 0 && <span className="ml-1.5 inline-flex items-center gap-0.5 text-emerald-600 dark:text-emerald-400"><ScanLine className="h-3 w-3" aria-hidden="true" /> <span>OCR verified</span></span>}
+                {Number(s.validatedByOcr) > 0 && <span className="ml-1.5 inline-flex items-center gap-0.5 text-emerald-600 dark:text-emerald-400"><ScanLine className="h-3 w-3" aria-hidden="true" /> OCR verified</span>}
                 </p>
               </div>
               <Badge

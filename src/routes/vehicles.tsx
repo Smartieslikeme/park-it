@@ -160,7 +160,7 @@ function VehicleFormDialog({ open, onOpenChange, vehicle, onSaved, queryClient }
             <div className="space-y-1.5"><Label htmlFor="vehicle-model" className="text-sm font-medium">Model</Label><Input id="vehicle-model" placeholder="Model 3" value={form.model} onChange={e => uf('model', e.target.value)} /></div>
           </div>
           <div className="border-t border-border pt-3 space-y-3">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Owner <span className="normal-case">(stored encrypted)</span></p>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Owner <span className="normal-case">(encrypted at rest)</span></p>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5"><Label htmlFor="vehicle-owner-name" className="text-sm font-medium">Name</Label><Input id="vehicle-owner-name" placeholder="John Doe" value={form.ownerName} onChange={e => uf('ownerName', e.target.value)} /></div>
               <div className="space-y-1.5"><Label htmlFor="vehicle-owner-phone" className="text-sm font-medium">Phone</Label><Input id="vehicle-owner-phone" placeholder="+1 555-1234" value={form.ownerPhone} onChange={e => uf('ownerPhone', e.target.value)} /></div>
