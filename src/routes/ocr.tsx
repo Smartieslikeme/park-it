@@ -258,9 +258,9 @@ function OcrPage() {
                       <p className="text-sm font-medium">Drop a permit image here</p>
                       <p className="text-xs text-muted-foreground mt-1">Image is deleted after analysis · JPG, PNG or WebP · up to 10 MB</p>
                     </div>
-                    <Button variant="outline" size="sm" type="button" onClick={(e) => { e.stopPropagation(); fileRef.current?.click() }}>
-                      <ImageIcon className="h-4 w-4 mr-1.5" aria-hidden="true" />Choose file
-                    </Button>
+                    <span className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium shadow-xs" aria-hidden="true">
+                      <ImageIcon className="h-4 w-4" />Choose file
+                    </span>
                   </div>
                 )}
                 {activeRules.length > 0 && (

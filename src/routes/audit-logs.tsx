@@ -103,7 +103,7 @@ function AuditLogsPage() {
                       onClick={() => toggle(log.id)}
                       className="w-full flex items-start gap-3 text-left"
                       aria-expanded={isOpen}
-                      aria-controls={`log-detail-${log.id}`}
+                      aria-controls={isOpen ? `log-detail-${log.id}` : undefined}
                       aria-label={`${ACTION_LABEL[log.action] ?? log.action} ${ENTITY_LABEL[log.entityType] ?? log.entityType} by ${user} — ${formatRelativeTime(log.createdAt)}. ${isOpen ? 'Collapse' : 'Expand'} details.`}
                     >
                       <span className={`mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-md shrink-0 ${log.action === 'create' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : log.action === 'update' ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300' : 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'}`} aria-hidden="true">

@@ -208,7 +208,7 @@ function RuleFormDialog({ open, onOpenChange, rule, spots, onSaved, queryClient 
             <div className="space-y-1.5">
               <Label htmlFor="rule-spot" className="text-sm font-medium">Spot <span className="text-destructive" aria-hidden="true">*</span><span className="sr-only">(required)</span></Label>
               <Select value={form.spotId} onValueChange={(v) => uf('spotId', v)}>
-                <SelectTrigger id="rule-spot"><SelectValue placeholder="Select spot" /></SelectTrigger>
+                <SelectTrigger id="rule-spot" aria-invalid={!!errors.spotId} aria-describedby={errors.spotId ? 'rule-spot-error' : undefined}><SelectValue placeholder="Select spot" /></SelectTrigger>
                 <SelectContent>{spots.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
               </Select>
               {errors.spotId && <p id="rule-spot-error" className="text-xs text-destructive" role="alert">{errors.spotId}</p>}
